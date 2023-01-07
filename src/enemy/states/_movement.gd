@@ -7,8 +7,8 @@ extends State
 # These should be fallback defaults
 # TODO: Make these null and raise an exception to indicate bad State extension
 #       to better separate movement vars.
-export var max_speed = 420
-export var move_speed = 210
+export var max_speed = 380
+export var move_speed = 190
 
 var velocity := Vector2.ZERO
 var input_direction = Vector2.ZERO

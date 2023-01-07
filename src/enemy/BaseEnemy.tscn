@@ -68,8 +68,13 @@ script = ExtResource( 9 )
 width = 4.0
 
 [node name="StateLabel" type="Label" parent="."]
-margin_right = 40.0
-margin_bottom = 14.0
+margin_left = -39.0
+margin_top = -37.0
+margin_right = 41.0
+margin_bottom = -23.0
+text = "STATE LABEL"
+align = 1
+valign = 1
 
 [node name="DetectionArea" type="Area2D" parent="."]
 

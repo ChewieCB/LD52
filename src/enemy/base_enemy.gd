@@ -7,6 +7,7 @@ export var follow_route_path := NodePath()
 onready var follow_route = get_node(follow_route_path)
 
 onready var raycast = $RayCast2D
+var space_state
 
 var state_machine
 var state_label
@@ -19,9 +20,15 @@ onready var detection_area_shape = $DetectionArea/CollisionShape2D.shape
 onready var stop_area_shape = $StopArea/CollisionShape2D.shape
 
 const cell_size = 32
-export (int) var DETECT_RADIUS = 6
-export (int) var NEAR_RADIUS = 2
-export (int) var VERY_NEAR_RADIUS = 2
+const cell_size_vector = Vector2(32, 32)
+export (int) var DETECT_RADIUS = 512
+export (int) var NEAR_RADIUS = 64
+export (int) var VERY_NEAR_RADIUS = 64
+var player_last_seen_position
+export (int) var view_angle setget set_view_angle
+export (int) var FOV = 60
+var view_cone_points setget set_view_cone_points
+var view_cone_points_colors
 
 # Behaviour flags
 export var IS_HOSTILE = true
@@ -40,11 +47,62 @@ const RED = Color(1.0, 0, 0, 0.4)
 const GREEN = Color(0, 1.0, 0, 0.4)
 var draw_colour = GREEN
 
+func _physics_process(_delta):
+	space_state = get_world_2d().direct_space_state
+	var view_cone = gen_circle_arc_poly(cell_size_vector/2, DETECT_RADIUS, view_angle - FOV/2, view_angle + FOV/2)
+	view_cone_points = view_cone[0]
+	view_cone_points_colors = view_cone[1]
+
+
+func _process(_delta):
+	update()
+
 func _draw():
-	# DEBUG - draw the detection radiuses
-	draw_circle(Vector2.ZERO, NEAR_RADIUS * cell_size, Color(0.6, 0, 0.7, 0.4))
-	draw_circle(Vector2.ZERO, VERY_NEAR_RADIUS * cell_size, Color(1, 1, 1, 0.4))
-	draw_circle(Vector2.ZERO, DETECT_RADIUS * cell_size, draw_colour)
+	if view_cone_points:
+		draw_polygon(view_cone_points, PoolColorArray([draw_colour]))
+	if player_last_seen_position:
+		draw_circle(to_local(player_last_seen_position + cell_size_vector / 2), 3, Color(0, 0, 1, 0.5))
+#	draw_circle(Vector2.ZERO, NEAR_RADIUS * cell_size, Color(0.6, 0, 0.7, 0.4))
+#	draw_circle(Vector2.ZERO, VERY_NEAR_RADIUS * cell_size, Color(1, 1, 1, 0.4))
+
+
+func gen_circle_arc_poly(center, radius, angle_from, angle_to):
+	var nb_points = 32
+	var points_arc = PoolVector2Array()
+	var colors = PoolColorArray()
+	points_arc.push_back(center)
+	colors.push_back(GREEN)
+	
+	for i in range(nb_points + 1):
+		var angle_point = angle_from + i * (angle_to - angle_from) / nb_points
+		var _point = center + Vector2(cos(deg2rad(angle_point)), sin(deg2rad(angle_point))) * radius
+		# Check if the point collides with anything
+		var result = space_state.intersect_ray(to_global(center), to_global(_point), [self, target], 1)
+		if result:
+			# Add the point where the ray collides
+			points_arc.push_back(to_local(result.position))
+			colors.push_back(RED)
+		else:
+			# Add the point as normal
+			points_arc.push_back(_point)
+			colors.push_back(GREEN)
+	set_view_cone_points(points_arc)
+	return [points_arc, colors]
+
+
+func set_view_angle(value):
+	view_angle = value
+	var new_cast = raycast.cast_to.rotated(deg2rad(value))
+	raycast.cast_to = new_cast
+	raycast.force_raycast_update()
+
+
+func set_view_cone_points(value):
+	view_cone_points = value
+	# FIXME - this shape isn't drawing correctly
+	var new_view_shape = ConvexPolygonShape2D.new()
+	new_view_shape.points = (view_cone_points)
+	$DetectionArea/CollisionShape2D.shape = new_view_shape
 
 
 func _on_DetectionArea_body_entered(body):

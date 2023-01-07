@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://assets/environment/spritesheet_characters.png" type="Texture" id=1]
 [ext_resource path="res://src/enemy/base_enemy.gd" type="Script" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://src/enemy/states/follow.gd" type="Script" id=7]
 [ext_resource path="res://src/enemy/states/_movement.gd" type="Script" id=8]
 [ext_resource path="res://src/enemy/states/die.gd" type="Script" id=9]
+[ext_resource path="res://src/enemy/states/search.gd" type="Script" id=10]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 16, 22 )
@@ -53,6 +54,9 @@ script = ExtResource( 7 )
 
 [node name="Chase" type="Node" parent="StateMachine/Movement"]
 script = ExtResource( 6 )
+
+[node name="Search" type="Node" parent="StateMachine/Movement"]
+script = ExtResource( 10 )
 
 [node name="Attack" type="Node" parent="StateMachine/Movement"]
 script = ExtResource( 5 )

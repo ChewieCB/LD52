@@ -21,7 +21,7 @@ func enter(_msg: Dictionary = {}):
 #	var remaining_path_points = path_points_array.slice(target_index, path_points_array.size())
 
 
-func physics_process(_delta: float):
+func physics_process(delta: float):
 	# FIXME - the index breaks at the end of the path loop
 	# Path to the target
 	target = path_points[follow_path_index]
@@ -32,15 +32,13 @@ func physics_process(_delta: float):
 	for _point in nav_path:
 		var _global_point = _point - _actor.global_position
 		path_line_points.append(_global_point)
-	var path_line = _actor.get_node("Line2D")
-	path_line.points = path_line_points
 	
 	# Move towards the target
 	# Point the viewcone towards the next point
 	_actor.raycast.cast_to = nav_path[1] - _actor.global_position
 	
 	# Calculate the movement distance for this frame
-	var distance_to_walk = _parent.move_speed * _delta
+	var distance_to_walk = _parent.move_speed * delta
 	
 	# Move the player along the path until he has run out of movement or the path ends.
 	while distance_to_walk > 0 and nav_path.size() > 0:

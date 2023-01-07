@@ -30,6 +30,8 @@ export (int) var FOV = 60
 var view_cone_points setget set_view_cone_points
 var view_cone_points_colors
 
+var last_position: Vector2
+
 # Behaviour flags
 export var IS_HOSTILE = true
 export var IS_FOLLOWING = false
@@ -56,6 +58,7 @@ func _physics_process(_delta):
 
 func _process(_delta):
 	update()
+
 
 func _draw():
 	if view_cone_points:
@@ -110,6 +113,7 @@ func _on_DetectionArea_body_entered(body):
 		draw_colour = RED
 		if not target:
 			target = body
+			last_position = self.global_position
 			state_machine.transition_to("Movement/Chase")
 
 
@@ -118,21 +122,22 @@ func _on_DetectionArea_body_exited(body):
 		if body == target:
 			target = null
 			draw_colour = GREEN
-			state_machine.transition_to("Movement/Idle")
+			player_last_seen_position = body.global_position
+			state_machine.transition_to("Movement/Search")
 
-
-func _on_StopArea_body_entered(body):
-	if body is Player and IS_HOSTILE:
-		if body == target:
-			target = null
-			draw_colour = GREEN
-			state_machine.transition_to("Movement/Idle")
-
-
-func _on_StopArea_body_exited(body):
-	if body is Player and IS_HOSTILE:
-		draw_colour = RED
-		if not target:
-			target = body
-			state_machine.transition_to("Movement/Chase")
+#
+#func _on_StopArea_body_entered(body):
+#	if body is Player and IS_HOSTILE:
+#		if body == target:
+#			target = null
+#			draw_colour = GREEN
+#			state_machine.transition_to("Movement/Idle")
+#
+#
+#func _on_StopArea_body_exited(body):
+#	if body is Player and IS_HOSTILE:
+#		draw_colour = RED
+#		if not target:
+#			target = body
+#			state_machine.transition_to("Movement/Chase")
 

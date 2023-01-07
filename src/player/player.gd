@@ -1,4 +1,5 @@
 extends KinematicBody2D
+class_name Player
 
 var MAX_SPEED = 400
 var ACCELERATION = 1700
@@ -6,6 +7,12 @@ var motion = Vector2()
 
 
 func _physics_process(delta: float) -> void:
+	# Debug Reset
+	if Input.is_action_pressed("reset"):
+		var _ret = get_tree().reload_current_scene()
+	elif Input.is_action_pressed("quit"):
+		get_tree().quit()
+		
 	var axis: Vector2 = get_input_axis()
 	if axis == Vector2.ZERO:
 		apply_friction(ACCELERATION * delta)

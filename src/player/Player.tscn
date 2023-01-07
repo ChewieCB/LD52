@@ -18,3 +18,4 @@ region_rect = Rect2( 460, 43, 30, 45 )
 shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
+current = true

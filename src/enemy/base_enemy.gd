@@ -40,8 +40,7 @@ export var IS_FOLLOWING = false
 func _ready():
 	state_machine = $StateMachine
 	state_label = $StateLabel
-	detection_area_shape.radius = DETECT_RADIUS * cell_size
-	stop_area_shape = NEAR_RADIUS * cell_size
+
 
 
 # Drawing the FOV
@@ -123,7 +122,8 @@ func _on_DetectionArea_body_exited(body):
 			target = null
 			draw_colour = GREEN
 			player_last_seen_position = body.global_position
-			state_machine.transition_to("Movement/Search")
+			if state_machine.state == $StateMachine/Movement/Chase:
+				state_machine.transition_to("Movement/Search")
 
 #
 #func _on_StopArea_body_entered(body):

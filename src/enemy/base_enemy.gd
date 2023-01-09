@@ -17,7 +17,9 @@ onready var audio_manager = null
 var target
 
 onready var detection_area_shape = $DetectionArea/CollisionShape2D.shape
-onready var stop_area_shape = $StopArea/CollisionShape2D.shape
+onready var attack_area = $AttackArea
+
+onready var attack_timer = $AttackTimer
 
 const cell_size = 32
 const cell_size_vector = Vector2(32, 32)
@@ -26,11 +28,14 @@ export (int) var NEAR_RADIUS = 64
 export (int) var VERY_NEAR_RADIUS = 64
 var player_last_seen_position
 export (int) var view_angle setget set_view_angle
-export (int) var FOV = 60
+export (int) var FOV = 80
 var view_cone_points setget set_view_cone_points
 var view_cone_points_colors
 
+var orig_position: Vector2
+var orig_rotation: float
 var last_position: Vector2
+var last_rotation: float
 
 # Behaviour flags
 export var IS_HOSTILE = true
@@ -40,12 +45,14 @@ export var IS_FOLLOWING = false
 func _ready():
 	state_machine = $StateMachine
 	state_label = $StateLabel
-
-
+	orig_position = self.global_position
+	orig_rotation = self.global_rotation
 
 # Drawing the FOV
 const RED = Color(1.0, 0, 0, 0.4)
 const GREEN = Color(0, 1.0, 0, 0.4)
+const YELLOW = Color(1.0, 1.0, 0, 0.4)
+const BLUE = Color(0, 10, 1.0, 0.4)
 var draw_colour = GREEN
 
 func _physics_process(_delta):
@@ -109,35 +116,21 @@ func set_view_cone_points(value):
 
 func _on_DetectionArea_body_entered(body):
 	if body is Player and IS_HOSTILE:
-		draw_colour = RED
-		if not target:
-			target = body
-			last_position = self.global_position
-			state_machine.transition_to("Movement/Chase")
+		if not body.is_dead:
+			draw_colour = RED
+			if not target:
+				target = body
+				last_position = self.global_position
+				last_rotation = self.global_rotation
+				state_machine.transition_to("Movement/Chase")
 
 
 func _on_DetectionArea_body_exited(body):
 	if body is Player:
-		if body == target:
+		if not body.is_dead and body == target:
 			target = null
 			draw_colour = GREEN
 			player_last_seen_position = body.global_position
 			if state_machine.state == $StateMachine/Movement/Chase:
 				state_machine.transition_to("Movement/Search")
-
-#
-#func _on_StopArea_body_entered(body):
-#	if body is Player and IS_HOSTILE:
-#		if body == target:
-#			target = null
-#			draw_colour = GREEN
-#			state_machine.transition_to("Movement/Idle")
-#
-#
-#func _on_StopArea_body_exited(body):
-#	if body is Player and IS_HOSTILE:
-#		draw_colour = RED
-#		if not target:
-#			target = body
-#			state_machine.transition_to("Movement/Chase")
 

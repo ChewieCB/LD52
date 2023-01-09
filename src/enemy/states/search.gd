@@ -7,6 +7,7 @@ func enter(_msg: Dictionary = {}):
 	target = _actor.player_last_seen_position
 	_parent.velocity = Vector2.ZERO
 	_parent.enter()
+	_actor.draw_colour = _actor.YELLOW
 
 
 func _physics_process(delta):

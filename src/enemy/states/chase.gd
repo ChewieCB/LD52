@@ -10,13 +10,18 @@ func enter(_msg: Dictionary = {}):
 	_parent.velocity = Vector2.ZERO
 	_parent.enter()
 	target = _actor.target
+	_actor.draw_colour = _actor.RED
 
 
 func physics_process(delta: float):
 	if not target:
-		# TODO - exit state
 		_state_machine.transition_to("Movement/Search")
 	else:
+		# Attack when in range
+		if _actor.position.distance_to(target.position) < 48:
+			_state_machine.transition_to("Movement/Attack")
+			return
+		
 		# Path to the target
 		var nav_path = _actor.nav.get_simple_path(_actor.position, target.position)
 		

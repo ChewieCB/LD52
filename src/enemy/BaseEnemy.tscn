@@ -18,7 +18,7 @@ extents = Vector2( 16, 22 )
 radius = 6.0
 
 [sub_resource type="CircleShape2D" id=3]
-radius = 2.0
+radius = 53.0
 
 [node name="BaseEnemy" type="KinematicBody2D"]
 collision_layer = 2
@@ -37,6 +37,7 @@ position = Vector2( 3, 1 )
 shape = SubResource( 1 )
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
+enabled = true
 cast_to = Vector2( 50, 0 )
 
 [node name="StateMachine" type="Node" parent="."]
@@ -82,14 +83,16 @@ valign = 1
 visible = false
 shape = SubResource( 4 )
 
-[node name="StopArea" type="Area2D" parent="."]
-visible = false
+[node name="AttackArea" type="Area2D" parent="."]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StopArea"]
-visible = false
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+position = Vector2( 21, 0 )
 shape = SubResource( 3 )
+
+[node name="AttackTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
 
 [connection signal="body_entered" from="DetectionArea" to="." method="_on_DetectionArea_body_entered"]
 [connection signal="body_exited" from="DetectionArea" to="." method="_on_DetectionArea_body_exited"]
-[connection signal="body_entered" from="StopArea" to="." method="_on_StopArea_body_entered"]
-[connection signal="body_exited" from="StopArea" to="." method="_on_StopArea_body_exited"]
+[connection signal="timeout" from="AttackTimer" to="StateMachine/Movement/Attack" method="_on_AttackTimer_timeout"]

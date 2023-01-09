@@ -25,7 +25,7 @@ func _ready():
 	if not parent.is_in_group("state_machine"):
 		_parent = parent
 	
-	audio_manager = _actor.audio_manager
+#	audio_manager = _actor.audio_manager
 
 
 func unhandled_input(_event: InputEvent):

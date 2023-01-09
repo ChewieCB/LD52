@@ -8,6 +8,7 @@ In the Idle state a character will mill about unmoving, but keeping watch for th
 func enter(_msg: Dictionary = {}):
 	_parent.velocity = Vector2.ZERO
 	_parent.enter()
+	_actor.draw_colour = _actor.GREEN
 
 
 func unhandled_input(event: InputEvent):
@@ -18,12 +19,20 @@ func physics_process(delta: float):
 	_parent.physics_process(delta)
 	
 	# Return to the enemy's initial position before idling or resuming follow path
-	if not _actor.last_position or _actor.global_position == _actor.last_position:
-		# TODO - exit state
-		_state_machine.transition_to("Movement/Idle")
-	else:
+	if _actor.last_position and _actor.global_position != _actor.last_position:
+		# Determine where to send the enemy back to
+		var target_position: Vector2
+		var target_rotation: float
+		match _actor.IS_FOLLOWING:
+			true:
+				target_position = _actor.last_position
+				target_rotation = _actor.last_rotation
+			false:
+				target_position = _actor.orig_position
+				target_rotation = _actor.orig_rotation
+		
 		# Path to the target
-		var nav_path = _actor.nav.get_simple_path(_actor.position, _actor.last_position)
+		var nav_path = _actor.nav.get_simple_path(_actor.position, target_position)
 		
 		# Convert the path points from local space to global space for the draw func
 		var path_line_points = []
@@ -51,6 +60,10 @@ func physics_process(delta: float):
 				nav_path.remove(0)
 			# Update the distance to walk
 			distance_to_walk -= distance_to_next_point
+		
+		# Reset the rotation at the end of the movement
+		if distance_to_walk >= 0 and nav_path.size() <= 0:
+			_actor.global_rotation = target_rotation
 	
 	if _actor.IS_FOLLOWING:
 		_state_machine.transition_to("Movement/Follow")

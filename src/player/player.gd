@@ -1,40 +1,17 @@
 extends KinematicBody2D
 class_name Player
 
-var MAX_SPEED = 400
-var ACCELERATION = 1700
-var motion = Vector2()
+onready var state_machine = $StateMachine
+onready var state_label = $StateLabel
+
+onready var is_dead = false
+
+onready var blood = $BloodSprite
 
 
-func _physics_process(delta: float) -> void:
-	# Debug Reset
-	if Input.is_action_pressed("reset"):
-		var _ret = get_tree().reload_current_scene()
-	elif Input.is_action_pressed("quit"):
-		get_tree().quit()
-		
-	var axis: Vector2 = get_input_axis()
-	if axis == Vector2.ZERO:
-		apply_friction(ACCELERATION * delta)
-	else:
-		apply_movement(axis * ACCELERATION * delta)
-	motion = move_and_slide(motion)
-	
-	look_at(get_global_mouse_position())
 
-func get_input_axis() -> Vector2:
-	var axis: Vector2 = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	return axis.normalized()
+func death():
+	state_machine.transition_to("Movement/Death")
+	is_dead = true
 
-
-func apply_friction(amount: float) -> void:
-	if motion.length() > amount:
-		motion -= motion.normalized() * amount
-	else:
-		motion = Vector2.ZERO
-
-
-func apply_movement(acceleration):
-	motion += acceleration
-	motion = motion.clamped(MAX_SPEED)
 
